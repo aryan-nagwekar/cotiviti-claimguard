@@ -1,0 +1,67 @@
+# ClaimGuard payment-integrity policies (ILLUSTRATIVE).
+#
+# ASSUMPTION: These rules and citations are plausible, synthetic encodings of
+# real payment-integrity concepts (NCCI PTP edits, CMS MUE, frequency editing,
+# place-of-service and age/sex appropriateness). They are NOT lifted verbatim
+# from any official edit file and must not be treated as legally exact. They
+# exist to demonstrate a deterministic rules engine, not to adjudicate claims.
+#
+# CPT/HCPCS codes are stored as strings throughout the project.
+
+rules:
+  - id: NCCI-PTP-001
+    name: Mutually exclusive / unbundled code pair
+    type: mutually_exclusive
+    params:
+      # If BOTH codes of a pair appear on one claim, the pair is unbundled.
+      code_pairs:
+        - ["80053", "80048"]   # Comprehensive vs. basic metabolic panel
+        - ["93000", "93005"]   # ECG complete vs. tracing-only
+    citation: "NCCI Procedure-to-Procedure (PTP) Edits, Ch. I — components of a mutually exclusive pair shall not be separately reported on the same date of service (illustrative)."
+
+  - id: FREQ-LIMIT-001
+    name: Daily frequency limit (per claim)
+    type: frequency_limit
+    params:
+      # Max number of times a CPT may appear on a single claim/day.
+      per_claim_max:
+        "99213": 1   # Established-patient office visit
+        "99214": 1
+    citation: "CMS frequency editing — an evaluation/management service reported more times per member per day than the established limit is presumptively over-billed (illustrative)."
+
+  - id: MUE-001
+    name: Medically Unlikely Edit (unit cap)
+    type: mue_unit_cap
+    params:
+      # Max billable units per claim for a given CPT.
+      max_units:
+        "36415": 1    # Routine venipuncture
+        "71046": 2    # Chest X-ray, 2 views
+    citation: "CMS Medically Unlikely Edits (MUE) — units of service exceeding the maximum medically reasonable amount for a single date of service are denied (illustrative)."
+
+  - id: POS-001
+    name: Place-of-service incompatibility
+    type: pos_mismatch
+    params:
+      # CPT -> list of allowed place-of-service codes.
+      allowed_pos:
+        "45378": ["22", "24"]   # Colonoscopy: hospital outpatient or ASC only
+      pos_labels:
+        "11": "Office"
+        "12": "Home"
+        "21": "Inpatient Hospital"
+        "22": "Outpatient Hospital"
+        "23": "Emergency Room"
+        "24": "Ambulatory Surgical Center"
+    citation: "CMS place-of-service editing — a procedure reported in a setting incompatible with its typical site of service is flagged for review (illustrative)."
+
+  - id: AGESEX-001
+    name: Age / sex inappropriate procedure
+    type: age_sex
+    params:
+      # CPT -> constraints. Any of: sex (M/F), min_age, max_age (inclusive).
+      constraints:
+        "76801": { sex: "F" }              # OB ultrasound, < 14 wks
+        "55700": { sex: "M" }              # Prostate biopsy
+        "99391": { max_age: 1 }            # Preventive visit, infant
+    citation: "CMS age/sex appropriateness editing — a procedure reported for a member whose age or sex is inconsistent with the service is flagged (illustrative)."

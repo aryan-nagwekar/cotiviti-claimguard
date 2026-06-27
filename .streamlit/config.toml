@@ -1,0 +1,11 @@
+# ClaimGuard dashboard theme. A config file — not a new dependency.
+[theme]
+base = "light"
+primaryColor = "#11808D"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F7F9"
+textColor = "#16242E"
+font = "sans serif"
+
+[server]
+headless = true
