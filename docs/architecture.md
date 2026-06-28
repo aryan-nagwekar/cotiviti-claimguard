@@ -7,7 +7,7 @@ flowchart LR
     A[data/synthetic_claims.csv] --> B[rules_engine.py<br/>deterministic policy checks]
     P[data/policies.yaml] --> B
     A --> C[anomaly.py<br/>peer-outlier stats]
-    B --> D[agent.py<br/>LLM chain-reasoning<br/>+ fallback]
+    B --> D[agent.py<br/>LLM decision rationale<br/>+ fallback]
     C --> D
     D --> E[audit.py<br/>events.jsonl<br/>governance layer]
     B & C & D & E --> F[pipeline.py<br/>orchestration / CLI]

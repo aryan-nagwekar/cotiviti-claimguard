@@ -140,6 +140,9 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.caption("⚠️ Demo uses synthetic claims and illustrative policy edits only. "
+           "Not for real claims adjudication.")
+
 df, ctx = build_table()
 
 # --- KPI cards ---
@@ -284,3 +287,7 @@ with right:
         else:
             st.caption("No audit event yet. Run `python src/pipeline.py "
                        "--run-all` or click 'Re-run via live agent' above.")
+
+st.divider()
+st.caption("ClaimGuard · synthetic claims and illustrative policy edits only — "
+           "not for real claims adjudication. Cotiviti intern take-home · Aryan Nagwekar.")

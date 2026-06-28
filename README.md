@@ -4,15 +4,27 @@
 
 ClaimGuard ingests synthetic medical claims, detects payment anomalies with a
 **deterministic rules engine** + a **statistical outlier layer**, then an **LLM
-agent chain-reasons** an explanation, a risk score (0–100), and a recommended
-action (**PAY / PEND / DENY / REVIEW**) with citations back to the policy it
-tripped. Every decision emits a structured, replayable **audit event**, and a
-small Streamlit dashboard visualizes the whole flow.
+agent produces a structured, evidence-grounded decision rationale**, a risk score
+(0–100), and a recommended action (**PAY / PEND / DENY / REVIEW**) with citations
+back to the policy it triggered. Every decision emits a structured, replayable
+**audit event**, and a small Streamlit dashboard visualizes the whole flow.
 
 > **Thesis:** agentic detection is the easy part — *governing* those agents
 > (explainability, audit trails, human-in-the-loop, trust scoring) is the real
 > unlock for a regulated payment-integrity company. The **audit layer** is what
 > sells that.
+
+---
+
+## 🎯 How this maps to the Cotiviti assessment
+
+- **Topic chosen:** Clinical Decision Making and Pattern Recognition in Health Care
+- **Healthcare area:** Payment integrity / claims review (TPO)
+- **Agentic AI:** LLM-based decision agent (`claude-sonnet-4-6`) with a deterministic fallback
+- **Pattern recognition:** provider-level CPT outlier detection (peer fence + z-score)
+- **Classification / inference:** risk scoring + recommended action (PAY / PEND / DENY / REVIEW)
+- **Governance:** replayable audit events, policy citations, human-in-the-loop review
+- **Deliverables:** report, POC code, slide deck, and MP4 video (in [`submission/`](submission/))
 
 ---
 
@@ -26,6 +38,22 @@ The supporting deliverables live in [`submission/`](submission/):
 - 🎬 `Cotiviti.mp4` — the recorded demo walkthrough
 - 📑 `Cotiviti.pdf` — report (PDF copy)
 
+The **MP4 walkthrough** covers, in order:
+
+1. PowerPoint overview
+2. CLI pipeline execution (`pipeline.py --run-all`)
+3. Audit replay (`audit.py <CLAIM_ID>`)
+4. Streamlit dashboard
+5. Human-in-the-loop override
+
+---
+
+## 🖼️ Screenshots
+
+![ClaimGuard dashboard overview](docs/screenshots/dashboard.png)
+
+![Claim detail with rationale, citations, and audit event](docs/screenshots/claim-detail.png)
+
 ---
 
 ## ⏱️ 60-second quickstart
@@ -36,7 +64,7 @@ pip install -r requirements.txt
 
 python src/generate_data.py        # 1. write ~212 synthetic claims (seed 42)
 python -m pytest -q                 # 2. rules engine: 10 tests green
-python src/pipeline.py --run-all    # 3. full chain + summary table
+python src/pipeline.py --run-all    # 3. full pipeline + summary table
 streamlit run app/dashboard.py      # 4. open the dashboard
 ```
 
@@ -86,13 +114,13 @@ auth, queues, Docker, or cloud.
 
 ## 🎬 Demo video walkthrough (exact click-path)
 
-1. **Terminal — the chain works headless.** Run `python src/pipeline.py --run-all`.
+1. **Terminal — the pipeline works headless.** Run `python src/pipeline.py --run-all`.
    Point out: it announces **FALLBACK mode**, processes 212 claims, and prints the
    action breakdown (**PAY / PEND / DENY / REVIEW**) and the **top-10 highest-risk**
    table. (`CLM00209` should be top at risk 95 → DENY.)
 2. **Terminal — explainability + audit.** Run `python src/audit.py CLM00209`. Show
    the **replayable audit event**: the 3 rules it fired, their **citations**, the
-   anomaly flag, the risk/action, and the full chain-of-reasoning. This is the
+   anomaly flag, the risk/action, and the full decision rationale. This is the
    governance story.
 3. **Dashboard — the product view.** `streamlit run app/dashboard.py`.
    - Show the **metrics row** and the **risk-sorted table**.

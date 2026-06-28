@@ -1,8 +1,9 @@
 """Agentic reasoning layer: explanation + risk score + recommended action.
 
 The agent takes a claim, its deterministic rule violations, and any provider
-anomaly, then produces a chain-of-reasoning explanation, a risk_score (0-100),
-a recommended_action (PAY / PEND / DENY / REVIEW), and the citations it relied on.
+anomaly, then produces a structured, evidence-grounded decision rationale, a
+risk_score (0-100), a recommended_action (PAY / PEND / DENY / REVIEW), and the
+citations it relied on.
 
 It calls the Anthropic API (model claude-sonnet-4-6) when ANTHROPIC_API_KEY is
 set. If the key is missing OR the call/parse fails, it deterministically composes
@@ -86,7 +87,8 @@ def _build_prompt(claim, violations, anomaly) -> str:
     ) or "- none"
     a_line = anomaly.detail if anomaly else "none"
     return f"""You are a payment-integrity claims-review agent for a health plan.
-Reason step by step over the evidence, then output a single decision.
+Produce a structured decision rationale grounded in the evidence below (the rules
+triggered, their citations, and the anomaly signal), then output a single decision.
 
 CLAIM FACTS:
 - claim_id: {claim['claim_id']}
@@ -110,7 +112,7 @@ Decide a recommended_action from exactly: PAY, PEND, DENY, REVIEW.
 Assign risk_score 0-100. Cite the policy citations you relied on (verbatim strings).
 
 Respond with ONLY a JSON object, no prose, no markdown fences:
-{{"reasoning": "<chain of reasoning>", "risk_score": <int 0-100>,
+{{"reasoning": "<structured decision rationale grounded in the rules, citations, and anomaly>", "risk_score": <int 0-100>,
 "recommended_action": "<PAY|PEND|DENY|REVIEW>", "citations": ["<citation>", ...]}}"""
 
 
